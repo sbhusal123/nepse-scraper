@@ -17,3 +17,7 @@ Crawls [nepalstock](https://nepalstock.com/)
 
 ## Runing Spider:
 
+``cd nepse && scrapy crawl stockprice -o out.json``
+
+This gives: ``out.json`` file inside `/nepse` directory.
+
