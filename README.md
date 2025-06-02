@@ -14,7 +14,6 @@ Crawls [nepalstock](https://nepalstock.com/)
 - Setup virtual env: ``python3 -m venv env``
 - Install packages: ``pip install -r requirements.txt``
 
-**Splash Setup:**
-- Make sure docker is setup.
-- Start Splash: ``docker run -it -p 8050:8050 --rm scrapinghub/splash``
+
+## Runing Spider:
 
