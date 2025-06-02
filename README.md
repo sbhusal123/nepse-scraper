@@ -4,7 +4,9 @@ Crawls [nepalstock](https://nepalstock.com/)
 
 **Tools:**
 - Scrapy for scraping
-- Splash as a js rendering enginee
+- Selenium for web broswer.
+
+
 
 
 ## Setup:
