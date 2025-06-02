@@ -1,0 +1,57 @@
+import scrapy
+import scrapy_splash
+
+from scrapy.shell import inspect_response
+
+from bs4 import BeautifulSoup
+
+# yield Request(url, dont_filter=True)
+
+class StockpriceSpider(scrapy.Spider):
+
+    name = "stockprice"
+    allowed_domains = ["nepalstock.com"]
+    start_urls = ["https://nepalstock.com"]
+
+    def start_requests(self):
+        return super().start_requests()
+
+
+
+    def parse(self, response):
+        html = response.body
+        soup = BeautifulSoup(html, "lxml")
+
+        ul = soup.find('ul', id="nepseticker")
+        label = ul.find('li')
+
+        for item in label.find_all('a'):
+            link = f'https://nepalstock.com{item.attrs['href']}'
+            yield scrapy.Request(
+                url=link,
+                callback=self.parse_data
+            )
+    
+    def parse_data(self, response):
+        data = response.body
+        soup = BeautifulSoup(data, "lxml")
+
+        # Find the table
+        table = soup.find("table", class_="table table-striped")
+
+        # Prepare dictionary to hold extracted data
+        data = {}
+        data['company'] = soup.find('h1').text
+
+        for row in table.find_all("tr"):
+            th = row.find("th")
+            td = row.find("td")
+
+            if th and td:
+                key = th.get_text(strip=True)
+                
+                value = ' '.join(td.stripped_strings)
+                
+                data[key] = value
+        
+        yield data
