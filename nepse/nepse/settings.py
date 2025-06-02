@@ -92,7 +92,7 @@ ROBOTSTXT_OBEY = True
 # Set settings whose default value is deprecated to a future-proof value
 FEED_EXPORT_ENCODING = "utf-8"
 
-# Custom Middleware To Extract Pages.
+# 
 DOWNLOADER_MIDDLEWARES = {
     'nepse.middlewares.selenium_middleware.SeleniumMiddleware': 543,
     'nepse.middlewares.retry_middleware.Retry404Middleware': 540,

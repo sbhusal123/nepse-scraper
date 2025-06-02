@@ -4,12 +4,20 @@ Crawls [nepalstock](https://nepalstock.com/)
 
 **Tools:**
 - Scrapy for scraping
-- Selenium for web broswer.
+- Selenium Hub Deployed On Kubernetes Cluster
 
 
+## Selenium Hub Setup:
+
+[Readme](./selenium_hub/README.md)
+
+**Commands:**
+- Start Hub: ``make start_hub``
+- Stop / Destroy Hub: ``make stop_hub``
+- Forward Port To Host: ``make forward_port`` exposes hub connect port.
 
 
-## Setup:
+## Crawler Setup:
 
 **Python Environment Setup:**
 - Python Version: ``3.12.3``
@@ -17,13 +25,13 @@ Crawls [nepalstock](https://nepalstock.com/)
 - Install packages: ``pip install -r requirements.txt``
 
 
-## Runing Spider:
+**Runing Spider:**
 
 ``cd nepse && scrapy crawl stockprice -o out.json``
 
 This gives: ``out.json`` file inside `/nepse` directory.
 
-## Sample Data:
+**Sample Data:**
 
 ```json
 {
@@ -45,3 +53,50 @@ This gives: ``out.json`` file inside `/nepse` directory.
 ```
 
 [Sample Data](./nepse/data.data)
+
+
+**Crawler Selenium Hub COnfiguration:**
+
+[Selenium Middleware](./nepse/nepse/middlewares/selenium_middleware.py)
+
+This middleware sends the request from Scrapy to Selenium and returns a HTML page back.
+
+```python
+# .....
+
+class SeleniumMiddleware:
+    def __init__(self):
+        chrome_options = Options()
+
+        # Uncomment to enable headless
+        # chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+
+        # HUB URL
+        selenium_hub_url = "http://localhost:4444/wd/hub"
+
+        self.driver = webdriver.Remote(
+            command_executor=selenium_hub_url,
+            options=chrome_options
+        )
+
+    def process_request(self, request, spider):
+        self.driver.get(request.url)
+
+        try:
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "h1"))
+            )
+        except Exception as e:
+            spider.logger.warning(f"Timeout waiting for page to load: {e}")
+
+        body = self.driver.page_source
+
+        return HtmlResponse(
+            self.driver.current_url,
+            body=body,
+            encoding='utf-8',
+            request=request
+        )
+
+```

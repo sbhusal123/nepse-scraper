@@ -5,8 +5,6 @@ from scrapy.shell import inspect_response
 
 from bs4 import BeautifulSoup
 
-# yield Request(url, dont_filter=True)
-
 class StockpriceSpider(scrapy.Spider):
 
     name = "stockprice"
@@ -42,6 +40,7 @@ class StockpriceSpider(scrapy.Spider):
         # Prepare dictionary to hold extracted data
         data = {}
         data['company'] = soup.find('h1').text
+        data["url"] = response.request.url
 
         for row in table.find_all("tr"):
             th = row.find("th")
