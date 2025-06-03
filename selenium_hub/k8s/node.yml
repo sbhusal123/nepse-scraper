@@ -3,8 +3,13 @@ kind: Deployment
 metadata:
   name: selenium-node-chrome
   namespace: selenium-grid
+  labels:
+    app: selenium-node-chrome
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "5555"
 spec:
-  replicas: 10
+  replicas: 2
   selector:
     matchLabels:
       app: selenium-node-chrome
@@ -13,6 +18,11 @@ spec:
       labels:
         app: selenium-node-chrome
     spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
       containers:
       - name: selenium-node-chrome
         image: selenium/node-chrome
@@ -27,3 +37,24 @@ spec:
           value: "3"
         ports:
         - containerPort: 5555
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: 5555
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /status
+            port: 5555
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "0.5"
+            memory: "0.5Gi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"

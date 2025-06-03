@@ -20,6 +20,14 @@ spec:
         - containerPort: 4444
         - containerPort: 4443
         - containerPort: 4442
+        resources:
+          requests:
+            cpu: "0.3"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+
 
 ---
 apiVersion: v1
