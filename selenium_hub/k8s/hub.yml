@@ -20,6 +20,22 @@ spec:
         - containerPort: 4444
         - containerPort: 4443
         - containerPort: 4442
+        livenessProbe:
+          httpGet:
+            path: /wd/hub/status
+            port: 4444
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /wd/hub/status
+            port: 4444
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
         resources:
           requests:
             cpu: "0.3"
@@ -27,7 +43,6 @@ spec:
           limits:
             cpu: "1"
             memory: "1Gi"
-
 
 ---
 apiVersion: v1
