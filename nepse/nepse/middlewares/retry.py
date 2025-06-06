@@ -6,6 +6,8 @@ from playwright._impl._errors import Error as PlayWrightError
 
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
+from rotating_proxies.middlewares import RotatingProxyMiddleware
+
 
 class CustomRetryOnExceptionMiddleware(RetryMiddleware):
     EXCEPTIONS_TO_RETRY = (
@@ -24,13 +26,12 @@ class CustomRetryOnExceptionMiddleware(RetryMiddleware):
             self.priority_adjust = -1
             
             max_retry_times = request.meta.get("max_retry_times", self.max_retry_times)
-            RETRY_PRIORITY = self.crawler.settings.get('RETRY_PRIORITY')
             return get_retry_request(
                 request=request,
                 reason=exception,
                 spider=spider,
                 max_retry_times=max_retry_times,
-                priority_adjust=RETRY_PRIORITY,
+                priority_adjust=-1,
             )
 
         return None

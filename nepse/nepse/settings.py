@@ -95,9 +95,9 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # Concurrency
 # -------------------------------------------------------------------------------------
-CONCURRENT_ITEMS = 80
-CONCURRENT_REQUESTS = 80
-CONCURRENT_REQUESTS_PER_DOMAIN = 80
+CONCURRENT_ITEMS = 5
+CONCURRENT_REQUESTS = 5
+CONCURRENT_REQUESTS_PER_DOMAIN = 5
 # -------------------------------------------------------------------------------------
 
 
@@ -195,7 +195,6 @@ DOWNLOAD_TIMEOUT = 10
 
 RETRY_ENABLED = True
 RETRY_TIMES = 10
-RETRY_PRIORITY = -1 # customized in middleware
 
 # Optional: Backoff between retries
 # Retry Time Backoff => RETRY_BACKOFF_BASE * (num_of_retry - 1 ) + random

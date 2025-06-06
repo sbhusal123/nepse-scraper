@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 
 from scrapy_playwright.page import PageMethod
 
+from scrapy import signals
+
+from nepse.utils import fetch_and_save_https_proxies
 
 # Note these settings are impacted by : DOWNLOAD_TIMEOUT in settings
 
@@ -20,6 +23,7 @@ class StockpriceSpider(scrapy.Spider):
     start_urls = ["https://nepalstock.com/"]
 
     def start_requests(self):
+        fetch_and_save_https_proxies() 
         yield scrapy.Request(
             url=self.start_urls[0],
             callback=self.parse,
@@ -80,4 +84,5 @@ class StockpriceSpider(scrapy.Spider):
                 
                 data[key] = value
         
-        yield data    
+        yield data
+
