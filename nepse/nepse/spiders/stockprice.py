@@ -3,19 +3,7 @@ from scrapy.shell import inspect_response
 
 from bs4 import BeautifulSoup
 
-from scrapy_playwright.page import PageMethod
-
-from scrapy import signals
-
 from nepse.utils import fetch_and_save_https_proxies
-
-# Note these settings are impacted by : DOWNLOAD_TIMEOUT in settings
-
-async def wait_initial_page(page):
-    await page.wait_for_selector("ul#nepseticker > li:last-child", timeout=10000)
-
-async def wait_company_page(page):
-    await page.wait_for_selector("h1", timeout=10000)
 
 class StockpriceSpider(scrapy.Spider):
     name = "stockprice"
@@ -23,18 +11,14 @@ class StockpriceSpider(scrapy.Spider):
     start_urls = ["https://nepalstock.com/"]
 
     def start_requests(self):
-        fetch_and_save_https_proxies() 
+        # fetch_and_save_https_proxies() 
         yield scrapy.Request(
             url=self.start_urls[0],
             callback=self.parse,
+            dont_filter=True,
             meta={
-                "playwright": True,
-                "playwright_page_methods": [
-                        PageMethod(wait_initial_page),
-                ],
-                 "playwright_context": "default",
-            },
-            dont_filter=True
+                "wait_for": "ul#nepseticker"
+            }
         )
 
     def parse(self, response):
@@ -51,14 +35,10 @@ class StockpriceSpider(scrapy.Spider):
             yield scrapy.Request(
                 url=link,
                 callback=self.parse_data,
+                dont_filter=True,
                 meta={
-                    "playwright": True,
-                    "playwright_page_methods": [
-                        PageMethod(wait_company_page),
-                    ],
-                    "playwright_context": "default",
-                },
-                dont_filter=True
+                    "wait_for": "table.table-striped"
+                }                
             )
     
     def parse_data(self, response):
@@ -85,4 +65,3 @@ class StockpriceSpider(scrapy.Spider):
                 data[key] = value
         
         yield data
-

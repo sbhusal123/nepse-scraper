@@ -11,7 +11,8 @@ Crawls [nepalstock](https://nepalstock.com/)
 
 [Kubernetes Setup](./selenium_hub/README.md)
 
-- 
+> Uses chrome nodes with single hub
+
 
 **Commands:**
 - Start Hub: ``make start_hub``

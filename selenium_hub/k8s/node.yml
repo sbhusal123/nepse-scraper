@@ -9,7 +9,7 @@ metadata:
     prometheus.io/scrape: "true"
     prometheus.io/port: "5555"
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
       app: selenium-node-chrome

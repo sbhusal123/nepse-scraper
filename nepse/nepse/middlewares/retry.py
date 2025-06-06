@@ -6,8 +6,6 @@ from playwright._impl._errors import Error as PlayWrightError
 
 from scrapy.downloadermiddlewares.retry import get_retry_request
 
-from rotating_proxies.middlewares import RotatingProxyMiddleware
-
 
 class CustomRetryOnExceptionMiddleware(RetryMiddleware):
     EXCEPTIONS_TO_RETRY = (

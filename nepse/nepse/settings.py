@@ -12,19 +12,21 @@ import os
 
 load_dotenv()
 
-JS_ENGINEE = os.environ.get('JS_ENGINEE', 'selenium')
+JS_ENGINE = os.environ.get('JS_ENGINE', 'selenium')
 HEADLESS = int(os.environ.get('HEADLESS', '0')) == 1
 
 HUB_URL = os.environ.get('HUB_URL', 'http://localhost:4444/wd/hub')
 
 BROWSER = os.environ.get('BROWSER', 'chrome')
 
+MAX_BROWSER_SESSIONS = int(os.environ.get('MAX_BROWSER_SESSIONS', 5))
+
 USE_PROXY = int(os.environ.get('USE_PROXY', '0')) == 1
 ROTATE_USER_AGENT = int(os.environ.get('ROTATE_USER_AGENT', '0')) == 1
 
-IS_SELENIUM = JS_ENGINEE == 'selenium'
-IS_PLAYWRIGHT = JS_ENGINEE == 'playwright'
-IS_SELENIUM_HUB = JS_ENGINEE == 'selenium-hub'
+IS_SELENIUM = JS_ENGINE == 'selenium'
+IS_PLAYWRIGHT = JS_ENGINE == 'playwright'
+IS_SELENIUM_HUB = JS_ENGINE == 'selenium-hub'
 
 BOT_NAME = "nepse"
 
@@ -126,8 +128,6 @@ CONCURRENT_REQUESTS_PER_DOMAIN = int(os.environ.get('RETRY_TIMESCONCURRENT_REQUE
 #       'nepse.middlewares.selenium_middleware.SeleniumMiddleware': 543,
 #       'nepse.middlewares.retry_middleware.Retry404Middleware': 540,
 # }
-
-MAX_BROWSER_SESSIONS = int(os.environ.get('MAX_BROWSER_SESSIONS', 5))
 SELENIUM_HEADLESS = HEADLESS
 
 # -------------------------------------------------------------------------------------
@@ -142,18 +142,18 @@ SELENIUM_HEADLESS = HEADLESS
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 550,
 
-    # retry on custom exceptions
+    # Download Error Exception
     'nepse.middlewares.retry.CustomRetryOnExceptionMiddleware': 555,
 }
 
 if IS_SELENIUM_HUB:
     DOWNLOADER_MIDDLEWARES.update({
-      'nepse.middlewares.selenium_middleware.SeleniumHubMiddleware': 543
+      'nepse.middlewares.selenium.SeleniumHubMiddleware': 543
     })
 
 if IS_SELENIUM:
     DOWNLOADER_MIDDLEWARES.update({
-      'nepse.middlewares.selenium_middleware.SeleniumStandaloneMiddleware': 543
+      'nepse.middlewares.selenium.SeleniumStandaloneMiddleware': 543
     })    
 
 if USE_PROXY:
@@ -206,6 +206,9 @@ PROXY_MODE = 0
 # Custom Download Handler at: nepse.downloaders.playwright.<>
 
 if IS_PLAYWRIGHT:
+    DOWNLOADER_MIDDLEWARES.update({
+        'nepse.middlewares.playwright.PlaywrightAutoMiddleware': 543
+    })
     DOWNLOAD_HANDLERS = {
         "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
         "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
