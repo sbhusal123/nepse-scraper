@@ -1,29 +1,46 @@
 # Selenium Nodes On Kubernetes:
 
-Hub With 5 replicas of chrome node.
-
 **Hub Settings:**
 
-```text
-SE_EVENT_BUS_PUBLISH_PORT => "4442"
-SE_EVENT_BUS_SUBSCRIBE_PORT => "4443"
+- Configure as per need:
+
+[Node Configuration](./k8s/node.yml)
+
+```yaml
+      containers:
+      - name: selenium-node-chrome
+        image: selenium/node-firefox:4.33.0-20250525
+        env:
+        ...
+        ...
+        - name: SE_NODE_MAX_SESSIONS
+          value: "2" # max num of sessions
 ```
 
-Hub accessible on port: ``4444``
+**Note that processing a single request requires:**
+- In headless alteast: => 1GB ram, 0.8CPU 
+- This also depends on weather a firefox or chrome.
+- Make sure to modify resource section
 
-
-
-**Nodes:**
+```yaml
+        resources:
+          requests:
+            cpu: "1"
+            memory: "1Gi"
+          limits:
+            cpu: "2"
+            memory: "3Gi"
 ```
-SE_NODE_MAX_SESSIONS / Concurrency => 8
-```
 
-Each Node can handle 8 requests concurrently.
+> Hub accessible on URL: ``http://localhost:4444/wd/hub`` if using locally.
+
 
 
 ## Commands:
 
 - Run: ``make run``
-- Get Port on Local: ``make forward_port``
+- Expose hub on localhost: ``make forward_port``
+- Stop hub: ``make stop_hub``
+
 
 For other commands refer: [Makefile](./Makefile)

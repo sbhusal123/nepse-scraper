@@ -7,6 +7,25 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+JS_ENGINEE = os.environ.get('JS_ENGINEE', 'selenium')
+HEADLESS = int(os.environ.get('HEADLESS', '0')) == 1
+
+HUB_URL = os.environ.get('HUB_URL', 'http://localhost:4444/wd/hub')
+
+BROWSER = os.environ.get('BROWSER', 'chrome')
+
+USE_PROXY = int(os.environ.get('USE_PROXY', '0')) == 1
+ROTATE_USER_AGENT = int(os.environ.get('ROTATE_USER_AGENT', '0')) == 1
+
+IS_SELENIUM = JS_ENGINEE == 'selenium'
+IS_PLAYWRIGHT = JS_ENGINEE == 'playwright'
+IS_SELENIUM_HUB = JS_ENGINEE == 'selenium-hub'
+
 BOT_NAME = "nepse"
 
 SPIDER_MODULES = ["nepse.spiders"]
@@ -95,9 +114,9 @@ FEED_EXPORT_ENCODING = "utf-8"
 
 # Concurrency
 # -------------------------------------------------------------------------------------
-CONCURRENT_ITEMS = 5
-CONCURRENT_REQUESTS = 5
-CONCURRENT_REQUESTS_PER_DOMAIN = 5
+CONCURRENT_ITEMS = int(os.environ.get('CONCURRENT_ITEMS', 50))
+CONCURRENT_REQUESTS = int(os.environ.get('CONCURRENT_REQUESTS', 20))
+CONCURRENT_REQUESTS_PER_DOMAIN = int(os.environ.get('RETRY_TIMESCONCURRENT_REQUESTS_PER_DOMAIN', 5))
 # -------------------------------------------------------------------------------------
 
 
@@ -108,27 +127,48 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 5
 #       'nepse.middlewares.retry_middleware.Retry404Middleware': 540,
 # }
 
-# SELENIUM_MAX_SESSIONS = 10
-# SELENIUM_HEADLESS = True
+MAX_BROWSER_SESSIONS = int(os.environ.get('MAX_BROWSER_SESSIONS', 5))
+SELENIUM_HEADLESS = HEADLESS
 
-# -------------------------------------------------------------------------------------
-
-# Random User Agent: https://pypi.org/project/scrapy-user-agents/
-# Rotating Proxy: https://github.com/TeamHG-Memex/scrapy-rotating-proxies
-# scrapy-proxies: https://github.com/aivarsk/scrapy-proxies
 # -------------------------------------------------------------------------------------
 
 # 
+
+# Random User Agent: https://pypi.org/project/scrapy-user-agents/
+# scrapy-proxies: https://github.com/aivarsk/scrapy-proxies
+# -------------------------------------------------------------------------------------
+
+
 DOWNLOADER_MIDDLEWARES = {
-    'scrapy_proxies.RandomProxy': 100,
-    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
-    'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
     'scrapy.downloadermiddlewares.retry.RetryMiddleware': 550,
+
+    # retry on custom exceptions
     'nepse.middlewares.retry.CustomRetryOnExceptionMiddleware': 555,
-    'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
-    'rotating_proxies.middlewares.BanDetectionMiddleware': 620,    
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
 }
+
+if IS_SELENIUM_HUB:
+    DOWNLOADER_MIDDLEWARES.update({
+      'nepse.middlewares.selenium_middleware.SeleniumHubMiddleware': 543
+    })
+
+if IS_SELENIUM:
+    DOWNLOADER_MIDDLEWARES.update({
+      'nepse.middlewares.selenium_middleware.SeleniumStandaloneMiddleware': 543
+    })    
+
+if USE_PROXY:
+    DOWNLOADER_MIDDLEWARES.update({
+        'scrapy_proxies.RandomProxy': 100,
+        'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 110,
+        'rotating_proxies.middlewares.RotatingProxyMiddleware': 610,
+        'rotating_proxies.middlewares.BanDetectionMiddleware': 620,
+    })
+
+if ROTATE_USER_AGENT:
+    DOWNLOADER_MIDDLEWARES.update({
+        'scrapy_user_agents.middlewares.RandomUserAgentMiddleware': 400,
+        'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    })
 
 # -------------------------------------------------------------------------------------
 
@@ -146,8 +186,10 @@ DOWNLOADER_MIDDLEWARES = {
 # http://host3:port
 # ...
 
-import os
 PROXY_LIST = os.path.join(os.getcwd() + '/proxy_list.txt')
+if not os.path.exists(PROXY_LIST):
+    with open(PROXY_LIST, 'w') as f:
+        pass
 
 # Proxy mode
 # 0 = Every requests have different proxy
@@ -162,44 +204,45 @@ PROXY_MODE = 0
 # -------------------------------------------------------------------------------------
 
 # Custom Download Handler at: nepse.downloaders.playwright.<>
-DOWNLOAD_HANDLERS = {
-    "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-    "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
-}
 
-PLAYWRIGHT_BROWSER_TYPE = "chromium"
+if IS_PLAYWRIGHT:
+    DOWNLOAD_HANDLERS = {
+        "http": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+        "https": "scrapy_playwright.handler.ScrapyPlaywrightDownloadHandler",
+    }
 
-PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": True
-}
+    PLAYWRIGHT_BROWSER_TYPE = "chromium"
+
+    PLAYWRIGHT_LAUNCH_OPTIONS = {
+        "headless": HEADLESS
+    }
+
+    # Add playwright context here
+    PLAYWRIGHT_CONTEXTS = {
+        "default": {
+            
+        }
+    }    
 
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 
-# 
-PLAYWRIGHT_CONTEXTS = {
-    "default": {
-        
-    }
-}
 # -------------------------------------------------------------------------------------
 
 STATS_DUMP = True
 
 
 # How long should request be waited by scrapy request response cycle
-DOWNLOAD_TIMEOUT = 10
+DOWNLOAD_TIMEOUT = int(os.environ.get('DOWNLOAD_TIMEOUT', 10))
 
 
 # Retry Timeouts
 # -------------------------------------------------------------------------------------
 
-RETRY_ENABLED = True
-RETRY_TIMES = 10
+RETRY_ENABLED = int(os.environ.get('RETRY_ENABLED', 1)) == 1
+RETRY_TIMES = int(os.environ.get('RETRY_TIMES', 10))
 
-# Optional: Backoff between retries
-# Retry Time Backoff => RETRY_BACKOFF_BASE * (num_of_retry - 1 ) + random
-RETRY_BACKOFF_BASE = 10  # exponential backoff base
-RETRY_BACKOFF_MAX = 30  # if retry queue time > 30, keep it
+RETRY_BACKOFF_BASE = int(os.environ.get('RETRY_BACKOFF_BASE', 5))
+RETRY_BACKOFF_MAX = int(os.environ.get('RETRY_BACKOFF_MAX', 60))
 # -------------------------------------------------------------------------------------
 
 
@@ -207,20 +250,16 @@ RETRY_BACKOFF_MAX = 30  # if retry queue time > 30, keep it
 # -------------------------------------------------------------------------------------
 
 # Enable disable throtling
-AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = int(os.environ.get('AUTOTHROTTLE_ENABLED', '1')) == 1
 
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 2
 
 # The maximum download delay to be set in case of high latencies
-AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = int(os.environ.get('AUTOTHROTTLE_MAX_DELAY', '60'))
 
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server: affected by concurrency limit
-AUTOTHROTTLE_TARGET_CONCURRENCY = 50.0
-
-# Enable showing throttling stats for every response received:
-AUTOTHROTTLE_DEBUG = False
-
+AUTOTHROTTLE_TARGET_CONCURRENCY = float(os.environ.get('AUTOTHROTTLE_TARGET_CONCURRENCY', '10'))
 # -------------------------------------------------------------------------------------
 

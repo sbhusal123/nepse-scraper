@@ -8,4 +8,3 @@ run_spider:
 	cd nepse && rm -rf out.json
 	cd nepse && rm -rf scrapy.log
 	cd nepse && scrapy crawl stockprice -s LOG_LEVEL=DEBUG -s LOG_FILE=scrapy.log -o out.json
-

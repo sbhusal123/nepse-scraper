@@ -26,7 +26,7 @@ spec:
       #   fsGroup: 1000
       containers:
       - name: selenium-node-chrome
-        image: selenium/node-firefox:4.33.0-20250525
+        image: selenium/node-chrome:4.33.0-20250525
         env:
         - name: SE_EVENT_BUS_HOST
           value: selenium-hub.selenium-grid.svc.cluster.local
