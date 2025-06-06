@@ -37,7 +37,7 @@ class StockpriceSpider(scrapy.Spider):
                 callback=self.parse_data,
                 dont_filter=True,
                 meta={
-                    "wait_for": "table.table-striped"
+                    "wait_for": "html body app-root div main.main div.container app-company-details main.main div.container div.row div.col-lg-4.mb-3.mb-lg-0 div.box, h1"
                 }                
             )
     

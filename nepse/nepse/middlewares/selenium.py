@@ -14,7 +14,7 @@ class SeleniumHubMiddleware(SeleniumRequestMixins):
 
     def __init__(self, settings):
         self.max_sessions = settings.getint('MAX_BROWSER_SESSIONS')
-        self.headless = settings.getint('HEADLESS')
+        self.headless = settings.getbool('HEADLESS')
         self.driver_pool = Queue(self.max_sessions)
         self.lock = threading.Lock()
 

@@ -3,6 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from selenium.webdriver.common.by import By
 
+from selenium.webdriver.support import expected_conditions as EC
+
 from selenium.webdriver.support.ui import WebDriverWait
 
 class SeleniumRequestMixins:
@@ -20,7 +22,7 @@ class SeleniumRequestMixins:
             wait_for = request.meta.get("wait_for")
             if wait_for:
                 WebDriverWait(driver, 10).until(
-                    lambda d: d.find_element(By.CSS_SELECTOR, wait_for)
+                    lambda d: len(d.find_elements(By.CSS_SELECTOR, wait_for)) > 0
                 )
 
             body = driver.page_source
