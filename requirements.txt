@@ -1,6 +1,7 @@
 Scrapy==2.13.1
 selenium==4.33.0
 scrapy-splash==0.11.1
+scrapy-playwright==0.0.43
 
 # escape manual downlaod for chrome webdriver
 webdriver-manager==4.0.2
@@ -8,3 +9,8 @@ webdriver-manager==4.0.2
 beautifulsoup4==4.13.4
 html5lib==1.1
 lxml==5.4.0
+httpx
+
+# user agent and proxying
+scrapy-user-agents==0.1.1
+scrapy-rotating-proxies==0.6.2
