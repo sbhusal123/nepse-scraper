@@ -170,7 +170,7 @@ DOWNLOAD_HANDLERS = {
 PLAYWRIGHT_BROWSER_TYPE = "chromium"
 
 PLAYWRIGHT_LAUNCH_OPTIONS = {
-    "headless": False
+    "headless": True
 }
 
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
